@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js"></script>
+    <script>
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setClearColor("#e5e5e5");
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        document.body.appendChild(renderer.domElement);
+        //For resize (Window ke liye)
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        })
+        var geometry = new THREE.BoxGeometry(1, 1, 1);
+        var material = new THREE.MeshLambertMaterial({ color: 0xFFCC00 });
+        var cube = new THREE.Mesh(geometry, material);
+        cube.rotation.x = Math.PI / 4;
+        cube.rotation.y = Math.PI / 4;
+        scene.add(cube);
+        camera.position.z = 5;
+        var isDragging = false;
+        var previousMousePosition = {
+            x: 0,
+            y: 0
+        };
+        document.addEventListener('mousedown', (event) => {
+            isDragging = true;
+        });
+        document.addEventListener('mousemove', (event) => {
+            var deltaMove = {
+                x: event.offsetX - previousMousePosition.x,
+                y: event.offsetY - previousMousePosition.y
+            };
+            if (isDragging) {
+                var deltaRotationQuaternion = new THREE.Quaternion()
+                    .setFromEuler(new THREE.Euler(toRadians(deltaMove.y * 1), toRadians(deltaMove.x * 1), 0,
+                        'XYZ'
+                    ));
+                 cube.quaternion.multiplyQuaternions(deltaRotationQuaternion, cube.quaternion);
+            }
+            previousMousePosition = {
+                x: event.offsetX,
+                y: event.offsetY
+            };
+        });
+        document.addEventListener('mouseup', (event) => {
+            isDragging = false;
+        });
+        document.addEventListener('mousewheel', (event) => {
+            camera.position.z += event.deltaY / 500;
+        });
+        // TO CHNAGE NUMBER TO RADIANS 
+        function toRadians(angle) {
+            return angle * (Math.PI / 180);
+        }
+         // TO CHNAGE NUMBER TO DEGREES 
+        function toDegrees(angle) {
+            return angle * (180 / Math.PI);
+        }
+        var light = new THREE.PointLight(0xFFFFFF, 2, 1000)
+        light.position.set(10, 0, 25);
+        scene.add(light);
+
+        var render = function () {
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+        render();
+    </script>
+</body>
+
+</html>
